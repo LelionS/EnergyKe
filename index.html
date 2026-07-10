@@ -519,7 +519,7 @@
 </head>
 <body>
 <div style="position:fixed; top:15px; left:25px; z-index:2000;">
-    <img src="logo.png" alt="Energy Masters Logo" style="width:90px; height:auto; display:block;">
+    <img src="logo.png" alt="Energy Masters Logo" style="width:110px; height:auto; display:block;">
 </div>
 
 <nav id="navbar">
@@ -594,7 +594,12 @@
         <div class="hero-content">
             <div class="hero-badge"><span class="dot"></span>Green · Reliable · Efficient</div>
             <h1 class="hero-title">Expert <span class="accent">Electrical</span><br>Services</h1>
-            <div class="hero-type-line">We handle:&nbsp;<span id="heroTyped"></span><span class="cursor"></span></div>
+           <div class="hero-type-line" style="display:flex; align-items:center; gap:6px; white-space:nowrap;">
+                <span>We handle:</span>
+                <span style="display:inline-block; min-width:320px;">
+                    <span id="heroTyped"></span><span class="cursor"></span>
+                </span>
+            </div>
             <p class="hero-desc">Residential and commercial electrical solutions. Fast, safe, and backed by a satisfaction guarantee.</p>
             <div class="hero-actions">
                 <a href="#booking" class="btn btn-primary">⚡ Book a Service</a>
