@@ -897,8 +897,8 @@
                 <div>
                     <div class="footer-col-title">Contact</div>
                     <ul class="footer-links">
-                        <li><a href="tel:+1234567890">(254)</a></li>
-                        <li><a href="mailto:info@energymasters.co.ke">info@energymasters.co.ke</a></li>
+                        <li><a href="tel:+254 798 214319">(254)</a></li>
+                        <li><a href="mailto:Energymasters@gmail.com">Energymasters@gmail.com</a></li>
                         <li><a href="#contact">Mon–Fri: 8 AM–6 PM</a></li>
                         <li><a href="#contact">Emergency: 24/7</a></li>
                     </ul>
@@ -1024,6 +1024,28 @@
     maintenance:'<span class="tag tag-maintain">Maintenance</span>',
     emergency:'<span class="tag tag-emergency">Emergency</span>',
   };
+
+async function loadServices() {
+    try {
+        const response = await fetch(GOOGLE_SCRIPT_URL + "?action=getServices");
+        const data = await response.json();
+
+        if (Array.isArray(data) && data.length > 0) {
+            services = data.map(item => ({
+                title: item.title || "",
+                category: (item.category || "installation").toLowerCase(),
+                desc: item.desc || "",
+                price: item.price || "",
+                img: item.img || "https://via.placeholder.com/600x400"
+            }));
+        }
+
+        renderServices();
+    } catch (err) {
+        console.error("Failed to load services:", err);
+        renderServices(); // use default services
+    }
+}
 
   function renderServices(filter='all') {
     const grid = document.getElementById('servicesGrid');
