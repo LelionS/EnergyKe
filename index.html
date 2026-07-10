@@ -511,45 +511,60 @@
         .fade-in{ opacity:0; transform:translateY(24px); transition:opacity .7s var(--ease), transform .7s var(--ease); }
         .fade-in.visible{ opacity:1; transform:translateY(0); }
 
-        @media (max-width: 768px) {
+@media (max-width: 768px) {
+
+    /* Transparent navbar */
+    #navbar{
+        background: transparent !important;
+        backdrop-filter: none !important;
+        box-shadow: none !important;
+    }
 
     /* Hide brand text */
     .nav-logo-word{
-        display:none !important;
+        display: none !important;
     }
 
     /* Hide desktop-only items */
     .nav-links,
     .nav-search-wrap,
     .nav-cta{
-        display:none !important;
+        display: none !important;
     }
 
     /* Navbar layout */
     .nav-inner{
-        display:flex !important;
-        align-items:center;
-        justify-content:flex-end;
-        position:relative;
-        min-height:70px;
+        display: flex !important;
+        align-items: center;
+        justify-content: flex-end;
+        min-height: 70px;
+        padding: 0 15px;
     }
 
-    /* Hamburger on the right */
+    /* Hamburger on the far right */
     .nav-burger{
-        display:flex !important;
-        margin-left:auto;
+        display: flex !important;
+        margin-left: auto;
+        z-index: 3001;
     }
 
     /* Floating logo */
     .floating-logo{
-        top:10px !important;
-        left:15px !important;
-        z-index:3000;
+        position: fixed !important;
+        top: 10px !important;
+        left: 0 !important;
+        z-index: 3000;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
     }
 
     .floating-logo img{
-        width:75px !important;
-        height:auto;
+        width: 75px !important;
+        height: auto;
+        display: block;
     }
 }
     </style>
