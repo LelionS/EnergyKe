@@ -511,6 +511,17 @@
         .fade-in{ opacity:0; transform:translateY(24px); transition:opacity .7s var(--ease), transform .7s var(--ease); }
         .fade-in.visible{ opacity:1; transform:translateY(0); }
 
+        @media (max-width: 768px) {
+            .floating-logo {
+                top: 70px !important;
+                left: 15px !important;
+            }
+        
+            .floating-logo img {
+                width: 75px !important;
+            }
+        }
+        
         @media(max-width:900px){
             .nav-links, .nav-search-wrap, .nav-cta{ display:none; }
             .nav-burger{ display:flex; }
@@ -518,10 +529,10 @@
     </style>
 </head>
 <body>
-<div style="position:fixed; top:15px; left:45px; z-index:2000;">
+<div class="floating-logo" style="position:fixed; top:15px; left:25px; z-index:2000;">
     <img src="logo.png" alt="Energy Masters Logo" style="width:110px; height:auto; display:block;">
 </div>
-
+    
 <nav id="navbar">
     <div class="nav-inner" style="display:flex; align-items:center; width:100%;">
 
