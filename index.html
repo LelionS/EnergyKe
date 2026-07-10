@@ -512,20 +512,46 @@
         .fade-in.visible{ opacity:1; transform:translateY(0); }
 
         @media (max-width: 768px) {
-            .floating-logo {
-                top: 70px !important;
-                left: 15px !important;
-            }
-        
-            .floating-logo img {
-                width: 75px !important;
-            }
-        }
-        
-        @media(max-width:900px){
-            .nav-links, .nav-search-wrap, .nav-cta{ display:none; }
-            .nav-burger{ display:flex; }
-        }
+
+    /* Hide brand text */
+    .nav-logo-word{
+        display:none !important;
+    }
+
+    /* Hide desktop-only items */
+    .nav-links,
+    .nav-search-wrap,
+    .nav-cta{
+        display:none !important;
+    }
+
+    /* Navbar layout */
+    .nav-inner{
+        display:flex !important;
+        align-items:center;
+        justify-content:flex-end;
+        position:relative;
+        min-height:70px;
+    }
+
+    /* Hamburger on the right */
+    .nav-burger{
+        display:flex !important;
+        margin-left:auto;
+    }
+
+    /* Floating logo */
+    .floating-logo{
+        top:10px !important;
+        left:15px !important;
+        z-index:3000;
+    }
+
+    .floating-logo img{
+        width:75px !important;
+        height:auto;
+    }
+}
     </style>
 </head>
 <body>
