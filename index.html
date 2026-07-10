@@ -519,44 +519,57 @@
 </head>
 <body>
 
-    <nav id="navbar">
-        <div class="nav-inner">
-            <div class="nav-logo">
-                <div class="nav-logo-badge" style="margin-left:auto; display:flex; align-items:center;">
-                    <img src="logo.png" alt="Energy Masters Logo" style="width:90px; height:auto; display:block;">
-                </div>     
-                <div class="nav-logo-word">Energy<span>Masters</span></div>
-            </div>
-            <ul class="nav-links">
-                <li><a href="#hero">Home</a></li>
-                <li><a href="#services">Services</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#contact">Contact</a></li>
-                <li><a href="#testimonials">Testimonials</a></li>
-            </ul>
-            <div class="nav-search-wrap">
-                <button class="nav-search-toggle" id="navSearchToggle" aria-label="Search">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                </button>
-                <div class="nav-search-box" id="navSearchBox">
-                    <input type="text" id="navSearchInput" placeholder="Search the site...">
-                    <div class="nav-search-results" id="navSearchResults"></div>
-                </div>
-            </div>
-            <a class="btn btn-primary nav-cta" href="#booking">Book Now</a>
-            <button class="nav-burger" id="navBurger" aria-label="Toggle menu">
-                <span></span><span></span><span></span>
+<nav id="navbar">
+    <div class="nav-inner" style="display:flex; align-items:center; width:100%;">
+
+        <div class="nav-logo">
+            <div class="nav-logo-word">Energy<span>Masters</span></div>
+        </div>
+
+        <ul class="nav-links">
+            <li><a href="#hero">Home</a></li>
+            <li><a href="#services">Services</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+            <li><a href="#testimonials">Testimonials</a></li>
+        </ul>
+
+        <div class="nav-search-wrap">
+            <button class="nav-search-toggle" id="navSearchToggle" aria-label="Search">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
             </button>
+
+            <div class="nav-search-box" id="navSearchBox">
+                <input type="text" id="navSearchInput" placeholder="Search the site...">
+                <div class="nav-search-results" id="navSearchResults"></div>
+            </div>
         </div>
-        <div class="nav-mobile" id="navMobile">
-            <a href="#hero" onclick="closeMenu()">Home</a>
-            <a href="#services" onclick="closeMenu()">Services</a>
-            <a href="#about" onclick="closeMenu()">About</a>
-            <a href="#contact" onclick="closeMenu()">Contact</a>
-            <a href="#testimonials" onclick="closeMenu()">Testimonials</a>
-            <a href="#booking" onclick="closeMenu()" class="btn btn-primary" style="margin-top:8px;text-align:center;justify-content:center;">Book Now</a>
+
+        <a class="btn btn-primary nav-cta" href="#booking">Book Now</a>
+
+        <button class="nav-burger" id="navBurger" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+        </button>
+
+        <!-- Right-aligned logo -->
+        <div class="nav-logo-badge" style="margin-left:auto; display:flex; align-items:center; padding-left:20px;">
+            <img src="logo.png" alt="Energy Masters Logo" style="width:90px; height:auto; display:block;">
         </div>
-    </nav>
+
+    </div>
+
+    <div class="nav-mobile" id="navMobile">
+        <a href="#hero" onclick="closeMenu()">Home</a>
+        <a href="#services" onclick="closeMenu()">Services</a>
+        <a href="#about" onclick="closeMenu()">About</a>
+        <a href="#contact" onclick="closeMenu()">Contact</a>
+        <a href="#testimonials" onclick="closeMenu()">Testimonials</a>
+        <a href="#booking" onclick="closeMenu()" class="btn btn-primary" style="margin-top:8px; text-align:center; justify-content:center;">Book Now</a>
+    </div>
+</nav>
 
     <section id="hero">
         <div class="hero-bg">
