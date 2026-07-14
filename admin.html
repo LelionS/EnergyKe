@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Energy Masters — Staff Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  *,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; }
+  :root{
+    --bg:#080b10; --bg-alt:#0c1017; --panel:#111722; --panel-2:#151d29;
+    --border:#212c3a; --border-soft:#182130; --text:#eef3f9; --muted:#8996a8; --muted-dim:#5d6a7c;
+    --amber:#22c55e; --amber-2:#16a34a; --amber-dim:rgba(34,197,94,.14);
+    --spark:#2ad8f0; --spark-dim:rgba(42,216,240,.14);
+    --danger:#ff5d73; --danger-dim:rgba(255,93,115,.14);
+    --success:#34e3a1; --success-dim:rgba(52,227,161,.14);
+    --font-head:'Space Grotesk',sans-serif; --font-body:'Inter',sans-serif;
+    --radius:14px; --fast:.2s ease;
+  }
+  body{ font-family:var(--font-body); background:var(--bg); color:var(--text); min-height:100vh;
+    background-image:radial-gradient(circle at 12% 8%, rgba(34,197,94,.07), transparent 42%), radial-gradient(circle at 88% 14%, rgba(42,216,240,.06), transparent 40%); }
+  a{ color:inherit; }
+  input,select,textarea,button{ font-family:var(--font-body); }
+  ::selection{ background:var(--amber); color:#0a0d12; }
+
+  /* ---------- Login screen ---------- */
+  #loginScreen{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+  .login-box{ width:100%; max-width:380px; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:38px; box-shadow:0 20px 50px -12px rgba(0,0,0,.55); }
+  .login-badge{ display:inline-flex; align-items:center; gap:8px; font-family:var(--font-head); font-size:.72rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--amber); background:var(--amber-dim); border:1px solid rgba(34,197,94,.3); padding:7px 14px; border-radius:99px; margin-bottom:18px; }
+  .login-title{ font-family:var(--font-head); font-size:1.6rem; font-weight:700; margin-bottom:6px; }
+  .login-sub{ color:var(--muted); font-size:.88rem; margin-bottom:26px; }
+  .login-box input{ width:100%; padding:13px 15px; border-radius:10px; border:1px solid var(--border); background:var(--bg-alt); color:var(--text); font-size:.95rem; margin-bottom:14px; }
+  .login-box input:focus{ outline:none; border-color:var(--amber); box-shadow:0 0 0 3px var(--amber-dim); }
+  .login-btn{ width:100%; padding:13px; border-radius:10px; border:none; background:linear-gradient(100deg,var(--amber),var(--amber-2)); color:#08150c; font-weight:700; font-size:.95rem; cursor:pointer; transition:transform var(--fast); }
+  .login-btn:hover{ transform:translateY(-2px); }
+  .login-error{ color:var(--danger); font-size:.85rem; margin-top:12px; display:none; }
+  .login-error.show{ display:block; }
+
+  /* ---------- Dashboard shell ---------- */
+  #dashboard{ display:none; min-height:100vh; }
+  #dashboard.show{ display:flex; }
+  .sidebar{ width:230px; flex-shrink:0; background:var(--panel); border-right:1px solid var(--border-soft); padding:26px 18px; display:flex; flex-direction:column; gap:4px; position:sticky; top:0; height:100vh; }
+  .sidebar-brand{ font-family:var(--font-head); font-weight:700; font-size:1.05rem; margin-bottom:6px; padding:0 10px; }
+  .sidebar-brand span{ color:var(--amber); }
+  .sidebar-sub{ color:var(--muted-dim); font-size:.72rem; padding:0 10px 22px; letter-spacing:.05em; text-transform:uppercase; }
+  .side-tab{ display:flex; align-items:center; gap:10px; padding:12px 12px; border-radius:10px; color:var(--muted); font-weight:600; font-size:.9rem; cursor:pointer; border:none; background:none; text-align:left; transition:background var(--fast), color var(--fast); }
+  .side-tab:hover{ background:var(--panel-2); color:var(--text); }
+  .side-tab.active{ background:var(--amber-dim); color:var(--amber); }
+  .sidebar-bottom{ margin-top:auto; display:flex; flex-direction:column; gap:8px; }
+  .logout-btn{ padding:11px 12px; border-radius:10px; border:1px solid var(--border); background:transparent; color:var(--muted); font-weight:600; font-size:.85rem; cursor:pointer; transition:all var(--fast); }
+  .logout-btn:hover{ border-color:var(--danger); color:var(--danger); }
+  .back-link{ font-size:.8rem; color:var(--muted-dim); padding:0 12px; }
+  .back-link:hover{ color:var(--spark); }
+
+  .main{ flex:1; padding:36px 42px; max-width:1100px; }
+  .view{ display:none; }
+  .view.active{ display:block; }
+  .view-header{ display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:14px; margin-bottom:28px; }
+  .view-title{ font-family:var(--font-head); font-size:1.7rem; font-weight:700; }
+  .view-sub{ color:var(--muted); font-size:.88rem; margin-top:6px; }
+  .refresh-btn{ padding:9px 18px; border-radius:99px; border:1px solid var(--border); background:var(--panel); color:var(--text); font-size:.82rem; font-weight:600; cursor:pointer; transition:all var(--fast); }
+  .refresh-btn:hover{ border-color:var(--spark); color:var(--spark); }
+
+  .panel-card{ background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:26px; margin-bottom:24px; }
+  .panel-card h3{ font-family:var(--font-head); font-size:1.05rem; margin-bottom:16px; }
+
+  .form-row{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media(max-width:700px){ .form-row{ grid-template-columns:1fr; } }
+  .form-group{ margin-bottom:14px; }
+  .form-group label{ display:block; font-size:.76rem; font-weight:600; color:var(--muted); margin-bottom:6px; letter-spacing:.02em; }
+  .form-group input, .form-group select, .form-group textarea{
+    width:100%; padding:11px 13px; border-radius:9px; border:1px solid var(--border); background:var(--bg-alt);
+    color:var(--text); font-size:.9rem; }
+  .form-group textarea{ min-height:80px; resize:vertical; }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus{ outline:none; border-color:var(--amber); box-shadow:0 0 0 3px var(--amber-dim); }
+  .submit-btn{ padding:12px 24px; border-radius:99px; border:none; background:linear-gradient(100deg,var(--amber),var(--amber-2)); color:#08150c; font-weight:700; font-size:.88rem; cursor:pointer; }
+  .submit-btn:disabled{ opacity:.6; cursor:not-allowed; }
+  .form-msg{ font-size:.85rem; font-weight:500; margin-top:12px; padding:10px 13px; border-radius:9px; display:none; }
+  .form-msg.success{ display:block; background:var(--success-dim); color:var(--success); border:1px solid rgba(52,227,161,.3); }
+  .form-msg.error{ display:block; background:var(--danger-dim); color:var(--danger); border:1px solid rgba(255,93,115,.3); }
+  .form-msg.info{ display:block; background:var(--spark-dim); color:var(--spark); border:1px solid rgba(42,216,240,.3); }
+
+  table{ width:100%; border-collapse:collapse; }
+  th{ text-align:left; font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted-dim); padding:10px 12px; border-bottom:1px solid var(--border); }
+  td{ padding:12px; border-bottom:1px solid var(--border-soft); font-size:.86rem; vertical-align:top; }
+  tr:last-child td{ border-bottom:none; }
+  .cell-desc{ max-width:280px; color:var(--muted); }
+  .cell-img{ width:56px; height:56px; border-radius:8px; object-fit:cover; background:var(--panel-2); }
+  .tag{ display:inline-block; padding:3px 10px; border-radius:99px; font-size:.68rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
+  .tag-install{ background:var(--spark-dim); color:var(--spark); }
+  .tag-repair{ background:var(--danger-dim); color:var(--danger); }
+  .tag-maintain{ background:var(--success-dim); color:var(--success); }
+  .tag-emergency{ background:var(--amber-dim); color:var(--amber); }
+  .tag-pending{ background:rgba(255,176,32,.14); color:#ffb020; }
+  .tag-approved{ background:var(--success-dim); color:var(--success); }
+  .tag-declined{ background:var(--danger-dim); color:var(--danger); }
+
+  .icon-btn{ padding:7px 14px; border-radius:8px; border:1px solid var(--border); background:var(--panel-2); color:var(--text); font-size:.78rem; font-weight:600; cursor:pointer; transition:all var(--fast); margin-right:6px; }
+  .icon-btn:hover{ border-color:var(--spark); color:var(--spark); }
+  .icon-btn.danger:hover{ border-color:var(--danger); color:var(--danger); background:var(--danger-dim); }
+  .icon-btn.success:hover{ border-color:var(--success); color:var(--success); background:var(--success-dim); }
+  .icon-btn:disabled{ opacity:.5; cursor:not-allowed; }
+
+  .empty-state{ text-align:center; padding:40px; color:var(--muted); font-size:.9rem; }
+  .loading-state{ text-align:center; padding:40px; color:var(--muted-dim); font-size:.85rem; }
+
+  .subtabs{ display:flex; gap:8px; margin-bottom:18px; }
+  .subtab-btn{ padding:8px 16px; border-radius:99px; border:1.5px solid var(--border); background:transparent; color:var(--muted); font-size:.8rem; font-weight:600; cursor:pointer; }
+  .subtab-btn.active{ background:var(--amber); border-color:var(--amber); color:#08150c; }
+
+  .note-box{ background:var(--spark-dim); border:1px solid rgba(42,216,240,.25); border-radius:10px; padding:12px 16px; font-size:.8rem; color:var(--spark); margin-bottom:20px; line-height:1.6; }
+
+  @media(max-width:860px){
+    #dashboard.show{ flex-direction:column; }
+    .sidebar{ width:100%; height:auto; position:relative; flex-direction:row; overflow-x:auto; padding:14px; }
+    .sidebar-brand,.sidebar-sub{ display:none; }
+    .sidebar-bottom{ margin-top:0; margin-left:auto; }
+    .main{ padding:24px 18px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN SCREEN ============ -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-badge">⚡ Staff Only</div>
+    <div class="login-title">Energy Masters Portal</div>
+    <p class="login-sub">Enter the staff password to manage services and testimonials.</p>
+    <input type="password" id="pwInput" placeholder="Password" autocomplete="current-password" />
+    <button class="login-btn" id="pwSubmit">Unlock Portal</button>
+    <div class="login-error" id="pwError">❌ Incorrect password. Please try again.</div>
+  </div>
+</div>
+
+<!-- ============ DASHBOARD ============ -->
+<div id="dashboard">
+  <div class="sidebar">
+    <div class="sidebar-brand">Energy<span>Masters</span></div>
+    <div class="sidebar-sub">Staff Portal</div>
+    <button class="side-tab active" data-view="services">🔧 Services</button>
+    <button class="side-tab" data-view="testimonials">💬 Testimonials</button>
+    <div class="sidebar-bottom">
+      <a class="back-link" href="index.html">← Back to site</a>
+      <button class="logout-btn" id="logoutBtn">Log Out</button>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- SERVICES VIEW -->
+    <div class="view active" id="view-services">
+      <div class="view-header">
+        <div>
+          <div class="view-title">Services</div>
+          <div class="view-sub">Add or remove the services shown on the public site.</div>
+        </div>
+        <button class="refresh-btn" id="refreshServices">↻ Refresh</button>
+      </div>
+
+      <div class="note-box">Changes save instantly, but the public site (and this list) reads from a cached Google Sheet feed, so it can take up to a minute to reflect after adding or deleting.</div>
+
+      <div class="panel-card">
+        <h3>Add a New Service</h3>
+        <form id="addServiceForm">
+          <div class="form-row">
+            <div class="form-group"><label>Title *</label><input type="text" id="svTitle" placeholder="e.g. Panel Upgrade" required /></div>
+            <div class="form-group">
+              <label>Category *</label>
+              <select id="svCategory" required>
+                <option value="installation">Installation</option>
+                <option value="repair">Repair</option>
+                <option value="maintenance">Maintenance</option>
+                <option value="emergency">Emergency</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group"><label>Description *</label><textarea id="svDesc" placeholder="Short description shown on the service card..." required></textarea></div>
+          <div class="form-row">
+            <div class="form-group"><label>Price label</label><input type="text" id="svPrice" placeholder="e.g. From $120" /></div>
+            <div class="form-group"><label>Image URL</label><input type="text" id="svImg" placeholder="https://..." /></div>
+          </div>
+          <button type="submit" class="submit-btn" id="svSubmitBtn">+ Add Service</button>
+          <div class="form-msg" id="svFormMsg"></div>
+        </form>
+      </div>
+
+      <div class="panel-card">
+        <h3>Current Services</h3>
+        <div id="servicesTableWrap"><div class="loading-state">Loading services…</div></div>
+      </div>
+    </div>
+
+    <!-- TESTIMONIALS VIEW -->
+    <div class="view" id="view-testimonials">
+      <div class="view-header">
+        <div>
+          <div class="view-title">Testimonials</div>
+          <div class="view-sub">Approve or decline testimonials submitted through the site.</div>
+        </div>
+        <button class="refresh-btn" id="refreshTestimonials">↻ Refresh</button>
+      </div>
+
+      <div class="subtabs">
+        <button class="subtab-btn active" data-status="pending">Pending</button>
+        <button class="subtab-btn" data-status="approved">Approved</button>
+        <button class="subtab-btn" data-status="declined">Declined</button>
+      </div>
+
+      <div class="panel-card">
+        <div id="testimonialsTableWrap"><div class="loading-state">Loading testimonials…</div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ================================================================
+// CONFIG
+// ================================================================
+const SHEET_ID = "1xU-3VmfxxKDYZ8v2NQE5ypOHWVvF33gJtEG4zWWZHnI";
+const GOOGLE_SCRIPT_URL =
+"https://script.google.com/macros/s/AKfycbzDUQVRsPuBS1NvorJ04ZDb13lZVwd-p_VQ5quYdhfiSF57srZHmZK0_GfkYD9N7ud1/exec";
+
+// SHA-256 hash of the staff password (default: "EnergyMasters2025!").
+// To change the password: open this file, compute a new SHA-256 hash of your
+// chosen password (e.g. paste it into https://emn178.github.io/online-tools/sha256.html
+// or run `python3 -c "import hashlib;print(hashlib.sha256(b'yourpassword').hexdigest())"`)
+// and paste the result below. Never put the plain password in this file.
+const PASSWORD_HASH = "8bc8abe06ede54d20d32e230aacc7d3536b95f9c6817de06ca09f5ab02a14a99";
+const SESSION_KEY = "em_admin_unlocked";
+
+async function sha256(text){
+  const enc = new TextEncoder().encode(text);
+  const buf = await crypto.subtle.digest('SHA-256', enc);
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+// ================================================================
+// LOGIN
+// ================================================================
+const loginScreen = document.getElementById('loginScreen');
+const dashboard = document.getElementById('dashboard');
+const pwInput = document.getElementById('pwInput');
+const pwError = document.getElementById('pwError');
+
+function unlock(){
+  loginScreen.style.display = 'none';
+  dashboard.classList.add('show');
+  loadServices();
+  loadTestimonials();
+}
+
+async function tryLogin(){
+  const hash = await sha256(pwInput.value);
+  if (hash === PASSWORD_HASH){
+    sessionStorage.setItem(SESSION_KEY, '1');
+    pwError.classList.remove('show');
+    unlock();
+  } else {
+    pwError.classList.add('show');
+    pwInput.value = '';
+    pwInput.focus();
+  }
+}
+
+document.getElementById('pwSubmit').addEventListener('click', tryLogin);
+pwInput.addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  sessionStorage.removeItem(SESSION_KEY);
+  location.reload();
+});
+
+if (sessionStorage.getItem(SESSION_KEY) === '1'){ unlock(); }
+
+// ================================================================
+// SIDEBAR NAVIGATION
+// ================================================================
+document.querySelectorAll('.side-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.side-tab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const view = btn.dataset.view;
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    document.getElementById('view-'+view).classList.add('active');
+  });
+});
+
+// ================================================================
+// SERVICES
+// ================================================================
+const tagMap = {
+  installation:'<span class="tag tag-install">Installation</span>',
+  repair:'<span class="tag tag-repair">Repair</span>',
+  maintenance:'<span class="tag tag-maintain">Maintenance</span>',
+  emergency:'<span class="tag tag-emergency">Emergency</span>',
+};
+let currentServices = [];
+
+function loadServices(){
+  document.getElementById('servicesTableWrap').innerHTML = '<div class="loading-state">Loading services…</div>';
+  const s = document.createElement('script');
+  s.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=responseHandler:_adminLoadServices&sheet=Services&_=${Date.now()}`;
+  s.onerror = () => { document.getElementById('servicesTableWrap').innerHTML = '<div class="empty-state">Could not load services from the sheet.</div>'; };
+  document.body.appendChild(s);
+}
+window._adminLoadServices = function(data){
+  try {
+    const rows = data.table.rows || [];
+    currentServices = rows.map(row => ({
+      id:       row.c[0] ? String(row.c[0].v) : '',
+      title:    row.c[1] ? String(row.c[1].v) : '',
+      category: row.c[2] ? String(row.c[2].v).toLowerCase() : 'installation',
+      desc:     row.c[3] ? String(row.c[3].v) : '',
+      price:    row.c[4] ? String(row.c[4].v) : '',
+      img:      row.c[5] ? String(row.c[5].v) : ''
+    })).filter(s => s.title);
+  } catch(e) { currentServices = []; }
+  renderServicesTable();
+};
+
+function renderServicesTable(){
+  const wrap = document.getElementById('servicesTableWrap');
+  if (!currentServices.length){
+    wrap.innerHTML = '<div class="empty-state">No services found yet.</div>';
+    return;
+  }
+  wrap.innerHTML = `<table>
+    <thead><tr><th></th><th>Title</th><th>Category</th><th>Description</th><th>Price</th><th></th></tr></thead>
+    <tbody>${currentServices.map(s => `
+      <tr>
+        <td>${s.img ? `<img class="cell-img" src="${s.img}" alt="">` : ''}</td>
+        <td><strong>${escapeHtml(s.title)}</strong></td>
+        <td>${tagMap[s.category] || s.category}</td>
+        <td class="cell-desc">${escapeHtml(s.desc)}</td>
+        <td>${escapeHtml(s.price)}</td>
+        <td><button class="icon-btn danger" onclick="deleteService('${s.id}')">Delete</button></td>
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+
+document.getElementById('refreshServices').addEventListener('click', loadServices);
+
+document.getElementById('addServiceForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const btn = document.getElementById('svSubmitBtn');
+  const msg = document.getElementById('svFormMsg');
+  const title = document.getElementById('svTitle').value.trim();
+  const category = document.getElementById('svCategory').value;
+  const desc = document.getElementById('svDesc').value.trim();
+  const price = document.getElementById('svPrice').value.trim();
+  const img = document.getElementById('svImg').value.trim();
+
+  if (!title || !desc){
+    msg.className = 'form-msg error'; msg.textContent = '⚠️ Title and description are required.';
+    return;
+  }
+
+  btn.disabled = true; btn.textContent = 'Adding...';
+  msg.className = 'form-msg';
+  try {
+    const fd = new FormData();
+    fd.append('action', 'addService');
+    fd.append('id', String(Date.now()));
+    fd.append('title', title);
+    fd.append('category', category);
+    fd.append('desc', desc);
+    fd.append('price', price);
+    fd.append('img', img);
+    const res = await fetch(GOOGLE_SCRIPT_URL, { method:'POST', body: fd });
+    const json = await res.json();
+    if (json.status !== 'success') throw new Error(json.message || 'Unknown error');
+    msg.className = 'form-msg success';
+    msg.textContent = '✅ Service added. It may take a minute to appear below and on the site.';
+    this.reset();
+    setTimeout(loadServices, 2500);
+  } catch(err){
+    msg.className = 'form-msg error';
+    msg.textContent = '❌ Could not add service: ' + (err.message || 'connection error');
+  } finally {
+    btn.disabled = false; btn.textContent = '+ Add Service';
+  }
+});
+
+async function deleteService(id){
+  if (!id){ alert('This service is missing an ID (it may predate the admin portal) and cannot be deleted from here.'); return; }
+  if (!confirm('Delete this service? This cannot be undone.')) return;
+  try {
+    const fd = new FormData();
+    fd.append('action', 'deleteService');
+    fd.append('id', id);
+    const res = await fetch(GOOGLE_SCRIPT_URL, { method:'POST', body: fd });
+    const json = await res.json();
+    if (json.status !== 'success') throw new Error();
+    currentServices = currentServices.filter(s => s.id !== id);
+    renderServicesTable();
+    setTimeout(loadServices, 2500);
+  } catch(err){
+    alert('Could not delete this service. Please try again.');
+  }
+}
+
+// ================================================================
+// TESTIMONIALS
+// ================================================================
+let currentTestimonials = [];
+let activeStatus = 'pending';
+
+function loadTestimonials(){
+  document.getElementById('testimonialsTableWrap').innerHTML = '<div class="loading-state">Loading testimonials…</div>';
+  const s = document.createElement('script');
+  s.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=responseHandler:_adminLoadTestimonials&sheet=Testimonials&_=${Date.now()}`;
+  s.onerror = () => { document.getElementById('testimonialsTableWrap').innerHTML = '<div class="empty-state">Could not load testimonials from the sheet.</div>'; };
+  document.body.appendChild(s);
+}
+window._adminLoadTestimonials = function(data){
+  try {
+    const rows = data.table.rows || [];
+    currentTestimonials = rows.map(row => ({
+      id:     row.c[0] ? String(row.c[0].v) : '',
+      name:   row.c[1] ? String(row.c[1].v) : '',
+      body:   row.c[2] ? String(row.c[2].v) : '',
+      status: row.c[3] ? String(row.c[3].v).toLowerCase() : 'pending',
+      date:   row.c[4] ? String(row.c[4].v) : ''
+    })).filter(t => t.body);
+  } catch(e) { currentTestimonials = []; }
+  renderTestimonialsTable();
+};
+
+document.querySelectorAll('.subtab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.subtab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    activeStatus = btn.dataset.status;
+    renderTestimonialsTable();
+  });
+});
+
+const statusTagMap = { pending:'tag-pending', approved:'tag-approved', declined:'tag-declined' };
+
+function renderTestimonialsTable(){
+  const wrap = document.getElementById('testimonialsTableWrap');
+  const list = currentTestimonials.filter(t => t.status === activeStatus);
+  if (!list.length){
+    wrap.innerHTML = `<div class="empty-state">No ${activeStatus} testimonials.</div>`;
+    return;
+  }
+  wrap.innerHTML = `<table>
+    <thead><tr><th>Name</th><th>Testimonial</th><th>Date</th><th>Status</th><th></th></tr></thead>
+    <tbody>${list.map(t => `
+      <tr>
+        <td><strong>${escapeHtml(t.name)}</strong></td>
+        <td class="cell-desc">${escapeHtml(t.body)}</td>
+        <td>${escapeHtml(t.date)}</td>
+        <td><span class="tag ${statusTagMap[t.status]||''}">${t.status}</span></td>
+        <td>
+          ${t.status !== 'approved' ? `<button class="icon-btn success" onclick="setTestimonialStatus('${t.id}','approved')">Approve</button>` : ''}
+          ${t.status !== 'declined' ? `<button class="icon-btn danger" onclick="setTestimonialStatus('${t.id}','declined')">Decline</button>` : ''}
+        </td>
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+
+document.getElementById('refreshTestimonials').addEventListener('click', loadTestimonials);
+
+async function setTestimonialStatus(id, status){
+  if (!id) return;
+  try {
+    const fd = new FormData();
+    fd.append('action', status === 'approved' ? 'approveTestimonial' : 'declineTestimonial');
+    fd.append('id', id);
+    const res = await fetch(GOOGLE_SCRIPT_URL, { method:'POST', body: fd });
+    const json = await res.json();
+    if (json.status !== 'success') throw new Error();
+    const t = currentTestimonials.find(x => x.id === id);
+    if (t) t.status = status;
+    renderTestimonialsTable();
+    setTimeout(loadTestimonials, 2500);
+  } catch(err){
+    alert('Could not update this testimonial. Please try again.');
+  }
+}
+
+function escapeHtml(str){
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
