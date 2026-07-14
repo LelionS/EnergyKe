@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
@@ -737,6 +737,7 @@
                 <div class="contact-form-wrap fade-in">
                     <div id="contactMsg" class="form-msg"></div>
                     <form id="contactForm" novalidate>
+                        <input type="hidden" name="action" value="contact" />
                         <div class="form-row">
                             <div class="form-group"><label for="cName">Full Name *</label><input id="cName" name="name" type="text" placeholder="John Smith" required /></div>
                             <div class="form-group"><label for="cEmail">Email *</label><input id="cEmail" name="email" type="email" placeholder="john@example.com" required /></div>
@@ -818,6 +819,7 @@
             <div class="booking-wrap fade-in">
                 <div id="bookingMsg" class="form-msg"></div>
                 <form id="bookingForm" novalidate>
+                    <input type="hidden" name="action" value="booking" />
                     <div class="form-row">
                         <div class="form-group"><label for="bName">Full Name *</label><input id="bName" name="name" type="text" placeholder="John Smith" required /></div>
                         <div class="form-group"><label for="bPhone">Phone *</label><input id="bPhone" name="phone" type="tel" placeholder="(123) 456-7890" required /></div>
@@ -935,6 +937,7 @@
                 <div class="modal-msg" id="modalMsg"></div>
 
                 <form id="modalForm" novalidate>
+                    <input type="hidden" name="action" value="serviceRequest" />
                     <input type="hidden" name="service" id="modalServiceInput" />
 
                     <div class="form-row">
@@ -991,7 +994,8 @@
   // ================================================================
   // GOOGLE SCRIPT CONNECTION ENDPOINT
   // ================================================================
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDUQVRsPuBS1NvorJ04ZDb13lZVwd-p_VQ5quYdhfiSF57srZHmZK0_GfkYD9N7ud1/exec";
+const GOOGLE_SCRIPT_URL =
+"https://script.google.com/macros/s/AKfycbzDUQVRsPuBS1NvorJ04ZDb13lZVwd-p_VQ5quYdhfiSF57srZHmZK0_GfkYD9N7ud1/exec";        const SHEET_ID = "1xU-3VmfxxKDYZ8v2NQE5ypOHWVvF33gJtEG4zWWZHnI";
 
   // ================================================================
   // EMAILJS CONFIGURATION — replace the placeholders with your real IDs
@@ -1005,47 +1009,13 @@
 
   // Services data — overwritten at runtime if Google Sheet has data
   let services = [
-    { title:'Panel Upgrade', category:'installation', desc:'Upgrade your electrical panel to handle modern loads safely. 100A–400A panels for homes and commercial buildings.', price:'', img:'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=70' },
-    { title:'Wiring Installation', category:'installation', desc:'Full rewiring for new builds and renovations. All work meets current NEC codes — residential and commercial.', price:'', img:'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=600&q=70' },
-    { title:'Outlet & Socket Installation', category:'installation', desc:'Add new outlets, USB ports, or replace old two-prong sockets with grounded three-prong outlets.', price:'', img:'https://images.unsplash.com/photo-1555664424-778a1e5e1b48?w=600&q=70' },
-    { title:'Lighting Installation', category:'installation', desc:'Recessed lighting, pendant fixtures, under-cabinet LEDs, and outdoor security lighting professionally installed.', price:'', img:'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=600&q=70' },
-    { title:'EV Charger Installation', category:'installation', desc:'Level 2 home EV charger installation. Compatible with Tesla, Rivian, Ford, GM, and all other EVs.', price:'', img:'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=600&q=70' },
-    { title:'Commercial Electrical', category:'installation', desc:'Large-scale commercial wiring, three-phase power, switchgear, and fit-out electrical for offices and warehouses.', price:'', img:'https://images.unsplash.com/photo-1513828583688-c52646db42da?w=600&q=70' },
-    { title:'Fault Diagnosis & Repair', category:'repair', desc:"Tripping breakers, flickering lights, dead outlets — we find the fault fast and fix it right the first time.", price:'', img:'https://images.unsplash.com/photo-1581092921461-39b43f7b5d6c?w=600&q=70' },
-    { title:'Circuit Breaker Repair', category:'repair', desc:'Breaker replacement, AFCI/GFCI upgrades, and overloaded circuit solutions done safely and quickly.', price:'', img:'https://images.unsplash.com/photo-1487875961445-47a00398c267?w=600&q=70' },
-    { title:'Safety Inspection', category:'maintenance', desc:'Comprehensive inspection of your entire electrical system. Identify hazards before they become costly problems.', price:'', img:'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&q=70' },
-    { title:'Annual Maintenance Plan', category:'maintenance', desc:'Scheduled annual check-ups keeping your system in top condition. Includes priority booking for repairs.', price:'', img:'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&q=70' },
-    { title:'Surge Protection', category:'maintenance', desc:'Whole-home surge protection installed at the panel level to safeguard all your electronics and appliances.', price:'', img:'https://images.unsplash.com/photo-1502920514313-52581002a659?w=600&q=70' },
-    { title:'Emergency Callout', category:'emergency', desc:'Power outage, sparks, burning smell, or any electrical emergency — our team responds within 60 minutes.', price:'', img:'https://images.unsplash.com/photo-1517817748493-49ec54a32465?w=600&q=70' },
-  ];
+    ];
   const tagMap = {
     installation:'<span class="tag tag-install">Installation</span>',
     repair:'<span class="tag tag-repair">Repair</span>',
     maintenance:'<span class="tag tag-maintain">Maintenance</span>',
     emergency:'<span class="tag tag-emergency">Emergency</span>',
   };
-
-async function loadServices() {
-    try {
-        const response = await fetch(GOOGLE_SCRIPT_URL + "?action=getServices");
-        const data = await response.json();
-
-        if (Array.isArray(data) && data.length > 0) {
-            services = data.map(item => ({
-                title: item.title || "",
-                category: (item.category || "installation").toLowerCase(),
-                desc: item.desc || "",
-                price: item.price || "",
-                img: item.img || "https://via.placeholder.com/600x400"
-            }));
-        }
-
-        renderServices();
-    } catch (err) {
-        console.error("Failed to load services:", err);
-        renderServices(); // use default services
-    }
-}
 
   function renderServices(filter='all') {
     const grid = document.getElementById('servicesGrid');
@@ -1158,11 +1128,11 @@ async function loadServices() {
   renderServices();
 
   // ── Live services from Google Sheet (Services tab) ────────────
-  // If the admin has saved services to the sheet, they override the defaults above.
+  // Columns: A=ID  B=Title  C=Category  D=Description  E=Price  F=Image URL
+  // If the admin has added/removed rows via the Admin Portal, they override the defaults above.
   (function() {
-      const SID = "12ua3QCimCrnejISkB9_iAZkPtpwtKsa07cSH5_wB8lw";
     const s = document.createElement('script');
-    s.src = `https://docs.google.com/spreadsheets/d/${SID}/gviz/tq?tqx=responseHandler:_loadSheetServices&sheet=Services`;
+    s.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=responseHandler:_loadSheetServices&sheet=Services`;
     s.onerror = function(){};
     document.body.appendChild(s);
   })();
@@ -1171,11 +1141,12 @@ async function loadServices() {
       const rows = data.table.rows;
       if (!rows || rows.length === 0) return;
       const loaded = rows.map(row => ({
-        title:    row.c[0] ? String(row.c[0].v) : '',
-        category: row.c[1] ? String(row.c[1].v) : 'installation',
-        desc:     row.c[2] ? String(row.c[2].v) : '',
-        price:    row.c[3] ? String(row.c[3].v) : '',
-        img:      row.c[4] ? String(row.c[4].v) : ''
+        id:       row.c[0] ? String(row.c[0].v) : '',
+        title:    row.c[1] ? String(row.c[1].v) : '',
+        category: row.c[2] ? String(row.c[2].v).toLowerCase() : 'installation',
+        desc:     row.c[3] ? String(row.c[3].v) : '',
+        price:    row.c[4] ? String(row.c[4].v) : '',
+        img:      row.c[5] ? String(row.c[5].v) : ''
       })).filter(s => s.title);
       if (loaded.length > 0) {
         services = loaded;
@@ -1344,22 +1315,16 @@ async function loadServices() {
   });
     </script>
     <script>
-    // Storage key used by both main and admin pages
-    const T_KEY = 'em_testimonials';
-
-    function loadTestimonials() {
-        try {
-            return JSON.parse(localStorage.getItem(T_KEY) || '[]');
-        } catch(e) { return []; }
-    }
-
-    function saveTestimonials(arr) {
-        localStorage.setItem(T_KEY, JSON.stringify(arr));
-    }
+    // ================================================================
+    // TESTIMONIALS — now backed by the shared Google Sheet (Testimonials tab)
+    // instead of localStorage, so submissions/approvals are visible to
+    // every visitor and to the Admin Portal, not just one browser.
+    // Columns: A=ID  B=Name  C=Body  D=Status (pending/approved/declined)  E=Date
+    // ================================================================
+    let _allTestimonials = [];
 
     function renderApprovedTestimonials() {
-        const all = loadTestimonials();
-        const approved = all.filter(t => t.status === 'approved');
+        const approved = _allTestimonials.filter(t => t.status === 'approved');
         const grid = document.getElementById('testimonialsGrid');
         const none = document.getElementById('tNoApproved');
         if (!grid) return;
@@ -1379,32 +1344,65 @@ async function loadServices() {
     }
 
     function escapeHtml(str) {
-        return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
-    function submitTestimonial() {
+    // Load all testimonials from the sheet, then show only approved ones.
+    (function() {
+        const s = document.createElement('script');
+        s.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=responseHandler:_loadSheetTestimonials&sheet=Testimonials`;
+        s.onerror = function(){};
+        document.body.appendChild(s);
+    })();
+    window._loadSheetTestimonials = function(data) {
+        try {
+            const rows = data.table.rows || [];
+            _allTestimonials = rows.map(row => ({
+                id:     row.c[0] ? String(row.c[0].v) : '',
+                name:   row.c[1] ? String(row.c[1].v) : '',
+                body:   row.c[2] ? String(row.c[2].v) : '',
+                status: row.c[3] ? String(row.c[3].v).toLowerCase() : 'pending',
+                date:   row.c[4] ? String(row.c[4].v) : ''
+            })).filter(t => t.body);
+        } catch(e) { _allTestimonials = []; }
+        renderApprovedTestimonials();
+    };
+
+    async function submitTestimonial() {
         const nameEl = document.getElementById('tName');
         const bodyEl = document.getElementById('tBody');
         const msgEl  = document.getElementById('tFormMsg');
         const name = nameEl.value.trim();
         const body = bodyEl.value.trim();
 
-        if (!name) { msgEl.style.color='#ef4444'; msgEl.textContent='⚠️ Please enter your name.'; return; }
-        if (body.length < 10) { msgEl.style.color='#ef4444'; msgEl.textContent='⚠️ Please write at least a few words.'; return; }
+        if (!name) { msgEl.style.color='#ff5d73'; msgEl.textContent='⚠️ Please enter your name.'; return; }
+        if (body.length < 10) { msgEl.style.color='#ff5d73'; msgEl.textContent='⚠️ Please write at least a few words.'; return; }
 
-        const all = loadTestimonials();
-        all.push({ id: Date.now(), name, body, status: 'pending', date: new Date().toLocaleDateString() });
-        saveTestimonials(all);
+        msgEl.style.color = 'var(--muted)';
+        msgEl.textContent = 'Sending...';
 
-        nameEl.value = '';
-        bodyEl.value = '';
-        msgEl.style.color = 'var(--accent)';
-        msgEl.textContent = '✅ Thank you! Your testimonial has been submitted for review.';
-        setTimeout(() => { msgEl.textContent = ''; }, 5000);
+        try {
+            const fd = new FormData();
+            fd.append('action', 'submitTestimonial');
+            fd.append('id', String(Date.now()));
+            fd.append('name', name);
+            fd.append('body', body);
+            fd.append('date', new Date().toLocaleDateString());
+
+            const res = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: fd });
+            const json = await res.json();
+            if (json.status !== 'success') throw new Error();
+
+            nameEl.value = '';
+            bodyEl.value = '';
+            msgEl.style.color = 'var(--success)';
+            msgEl.textContent = '✅ Thank you! Your testimonial has been submitted for review.';
+        } catch(err) {
+            msgEl.style.color = '#ff5d73';
+            msgEl.textContent = '❌ Could not submit right now. Please try again shortly.';
+        }
+        setTimeout(() => { msgEl.textContent = ''; }, 6000);
     }
-
-    // Render on load
-    renderApprovedTestimonials();
     </script>
 
     <!-- ── HERO TYPING EFFECT (visual enhancement only) ── -->
