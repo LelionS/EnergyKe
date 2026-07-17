@@ -142,6 +142,7 @@
     <div class="sidebar-brand">Energy<span>Masters</span></div>
     <div class="sidebar-sub">Staff Portal</div>
     <button class="side-tab active" data-view="services">🔧 Services</button>
+    <button class="side-tab" data-view="gallery">🖼️ Gallery</button>
     <button class="side-tab" data-view="testimonials">💬 Testimonials</button>
     <div class="sidebar-bottom">
       <a class="back-link" href="index.html">← Back to site</a>
@@ -194,6 +195,71 @@
       </div>
     </div>
 
+
+        <!-- GALLERY VIEW -->
+    <div class="view" id="view-gallery">
+      <div class="view-header">
+        <div>
+          <div class="view-title">Gallery Showcase</div>
+          <div class="view-sub">Manage the projects and images running on the public infinite auto-scroll banner.</div>
+        </div>
+        <button class="refresh-btn" id="refreshGallery">↻ Refresh</button>
+      </div>
+
+      <div class="note-box">You can configure up to 3 sub-images for the modal details strip. Leave any optional image URLs blank if not needed.</div>
+
+      <div class="panel-card">
+        <h3>Add a New Gallery Item</h3>
+        <form id="addGalleryForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Project Title *</label>
+              <input type="text" id="galTitle" placeholder="e.g. Sossusvlei Desert Dunes" required />
+            </div>
+            <div class="form-group">
+              <label>Category Tag *</label>
+              <input type="text" id="galTag" placeholder="e.g. Nature" required />
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label>Detailed Description *</label>
+            <textarea id="galDesc" placeholder="This text will be displayed on the right-hand panel inside the interactive popup modal..." required></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Main Thumbnail Image URL *</label>
+              <input type="url" id="galThumb" placeholder="https://example.com/main-thumbnail.jpg" required />
+            </div>
+            <div class="form-group">
+              <label>Related Detail Image 1 URL</label>
+              <input type="url" id="galRelated1" placeholder="https://example.com/detail-1.jpg" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Related Detail Image 2 URL</label>
+              <input type="url" id="galRelated2" placeholder="https://example.com/detail-2.jpg" />
+            </div>
+            <div class="form-group">
+              <label>Related Detail Image 3 URL</label>
+              <input type="url" id="galRelated3" placeholder="https://example.com/detail-3.jpg" />
+            </div>
+          </div>
+
+          <button type="submit" class="submit-btn" id="galSubmitBtn">+ Add Gallery Item</button>
+          <div class="form-msg" id="galFormMsg"></div>
+        </form>
+      </div>
+
+      <div class="panel-card">
+        <h3>Current Gallery Items</h3>
+        <div id="galleryTableWrap"><div class="loading-state">Loading showcase gallery…</div></div>
+      </div>
+    </div>
+
     <!-- TESTIMONIALS VIEW -->
     <div class="view" id="view-testimonials">
       <div class="view-header">
@@ -224,7 +290,8 @@ const API = {
     services: "https://sheetdb.io/api/v1/jck3mslfaposo",
     contacts: "https://sheetdb.io/api/v1/CONTACT_API_ID",
     bookings: "https://sheetdb.io/api/v1/adb6hsa4zfali",
-    testimonials: "https://sheetdb.io/api/v1/ock3853wuff2j"
+    testimonials: "https://sheetdb.io/api/v1/ock3853wuff2j",
+    gallery: "https://sheetdb.io/api/v1/brlb1fmx0y8h4",
 };
 
 async function sheetdbGet(apiUrl, searchParams = {}) {
@@ -319,6 +386,7 @@ function unlock(){
 
     loadServices();
     loadTestimonials();
+    loadGallery();
 
     // Uncomment once the views exist
     // loadContacts();
@@ -698,6 +766,131 @@ async function deleteContact(id) {
 
     loadContacts();
 
+}
+
+// ================================================================
+// GALLERY MANAGEMENT (SheetDB)
+// ================================================================
+let currentGallery = [];
+
+async function loadGallery() {
+  const wrap = document.getElementById('galleryTableWrap');
+  wrap.innerHTML = '<div class="loading-state">Loading gallery items…</div>';
+  try {
+    const rows = await sheetdbGet(API.gallery);
+    currentGallery = (Array.isArray(rows) ? rows : []).map(row => ({
+      id: row.id || '',
+      title: row.title || '',
+      tag: row.tag || '',
+      description: row.description || '',
+      thumbImg: row.thumbImg || '',
+      relatedImg1: row.relatedImg1 || '',
+      relatedImg2: row.relatedImg2 || '',
+      relatedImg3: row.relatedImg3 || ''
+    })).filter(g => g.title);
+  } catch(e) {
+    currentGallery = [];
+    wrap.innerHTML = '<div class="empty-state">Could not load gallery from the sheet.</div>';
+    return;
+  }
+  renderGalleryTable();
+}
+
+function renderGalleryTable() {
+  const wrap = document.getElementById('galleryTableWrap');
+  if (!currentGallery.length) {
+    wrap.innerHTML = '<div class="empty-state">No gallery items found yet.</div>';
+    return;
+  }
+  
+  wrap.innerHTML = `<table>
+    <thead>
+      <tr>
+        <th>Cover</th>
+        <th>Title</th>
+        <th>Tag</th>
+        <th>Description</th>
+        <th>Related Images</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      ${currentGallery.map(g => {
+        // Build sub-images counts
+        const subCount = [g.relatedImg1, g.relatedImg2, g.relatedImg3].filter(Boolean).length;
+        return `
+          <tr>
+            <td>${g.thumbImg ? `<img class="cell-img" src="${g.thumbImg}" alt="">` : ''}</td>
+            <td><strong>${escapeHtml(g.title)}</strong></td>
+            <td><span class="tag tag-install">${escapeHtml(g.tag)}</span></td>
+            <td class="cell-desc">${escapeHtml(g.description)}</td>
+            <td>${subCount} item(s) uploaded</td>
+            <td><button class="icon-btn danger" onclick="deleteGalleryItem('${g.id}')">Delete</button></td>
+          </tr>`;
+      }).join('')}
+    </tbody>
+  </table>`;
+}
+
+document.getElementById('refreshGallery').addEventListener('click', loadGallery);
+
+document.getElementById('addGalleryForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const btn = document.getElementById('galSubmitBtn');
+  const msg = document.getElementById('galFormMsg');
+  
+  const title = document.getElementById('galTitle').value.trim();
+  const tag = document.getElementById('galTag').value.trim();
+  const description = document.getElementById('galDesc').value.trim();
+  const thumbImg = document.getElementById('galThumb').value.trim();
+  const relatedImg1 = document.getElementById('galRelated1').value.trim();
+  const relatedImg2 = document.getElementById('galRelated2').value.trim();
+  const relatedImg3 = document.getElementById('galRelated3').value.trim();
+
+  btn.disabled = true; 
+  btn.textContent = 'Uploading...';
+  msg.className = 'form-msg';
+  
+  try {
+    await sheetdbInsert(API.gallery, {
+      id: String(Date.now()),
+      title: title,
+      tag: tag,
+      description: description,
+      thumbImg: thumbImg,
+      relatedImg1: relatedImg1,
+      relatedImg2: relatedImg2,
+      relatedImg3: relatedImg3
+    });
+    
+    msg.className = 'form-msg success';
+    msg.textContent = '✅ Gallery item added successfully!';
+    this.reset();
+    setTimeout(loadGallery, 1200);
+  } catch(err) {
+    msg.className = 'form-msg error';
+    msg.textContent = '❌ Could not save gallery item: ' + (err.message || 'connection error');
+  } finally {
+    btn.disabled = false; 
+    btn.textContent = '+ Add Gallery Item';
+  }
+});
+
+async function deleteGalleryItem(id) {
+  if (!id) { 
+    alert('This item is missing an ID and cannot be managed.'); 
+    return; 
+  }
+  if (!confirm('Are you sure you want to delete this gallery item?')) return;
+  
+  try {
+    await sheetdbDeleteById(API.gallery, id);
+    currentGallery = currentGallery.filter(g => g.id !== id);
+    renderGalleryTable();
+    setTimeout(loadGallery, 1200);
+  } catch(err) {
+    alert('Could not delete this item. Please try again.');
+  }
 }
 
 // ================================================================
