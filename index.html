@@ -1000,11 +1000,11 @@ const GOOGLE_SCRIPT_URL =
   // ================================================================
   // EMAILJS CONFIGURATION — replace the placeholders with your real IDs
         // ===============================================================
-        const EMAILJS_SERVICE_ID = "service_3o9tjvp";          // e.g. "service_abc123"
-        const EMAILJS_TEMPLATE_BOOKING = "template_1vqkx7g"; // e.g. "template_xyz789"
-        const EMAILJS_TEMPLATE_CONTACT = "template_z0c5y6h"; // e.g. "template_abc456"
+        const EMAILJS_SERVICE_ID = "service_uktcxkm";          // e.g. "service_abc123"
+        const EMAILJS_TEMPLATE_BOOKING = "template_krh6ygy"; // e.g. "template_xyz789"
+        const EMAILJS_TEMPLATE_CONTACT = "template_i38h45m"; // e.g. "template_abc456"
         (function () {
-            emailjs.init({ publicKey: "d84LESid9HnZfdksu" });
+            emailjs.init({ publicKey: "t4zHrOFyTGmwF_2hd" });
         })();
 
   // Services data — overwritten at runtime if Google Sheet has data
@@ -1316,94 +1316,176 @@ const GOOGLE_SCRIPT_URL =
     </script>
     <script>
     // ================================================================
-    // TESTIMONIALS — now backed by the shared Google Sheet (Testimonials tab)
-    // instead of localStorage, so submissions/approvals are visible to
-    // every visitor and to the Admin Portal, not just one browser.
-    // Columns: A=ID  B=Name  C=Body  D=Status (pending/approved/declined)  E=Date
+    // TESTIMONIALS (SheetDB Version)
+    //
+    // Google Sheet headers:
+    // id | name | body | status | date
+    //
+    // Status values:
+    // pending
+    // approved
+    // declined
     // ================================================================
+
+    const TESTIMONIAL_API = "https://sheetdb.io/api/v1/ock3853wuff2j";
+
     let _allTestimonials = [];
 
+    // ------------------------------------------------
+    // Escape HTML
+    // ------------------------------------------------
+    function escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    // ------------------------------------------------
+    // Render only approved testimonials
+    // ------------------------------------------------
     function renderApprovedTestimonials() {
-        const approved = _allTestimonials.filter(t => t.status === 'approved');
-        const grid = document.getElementById('testimonialsGrid');
-        const none = document.getElementById('tNoApproved');
+        const approved = _allTestimonials.filter(
+            t => (t.status || "").toLowerCase() === "approved"
+        );
+
+        const grid = document.getElementById("testimonialsGrid");
+        const none = document.getElementById("tNoApproved");
+
         if (!grid) return;
+
         if (approved.length === 0) {
-            grid.style.display = 'none';
-            none.style.display = 'block';
+            grid.style.display = "none";
+            if (none) none.style.display = "block";
             return;
         }
-        none.style.display = 'none';
-        grid.style.display = 'grid';
+
+        if (none) none.style.display = "none";
+        grid.style.display = "grid";
+
         grid.innerHTML = approved.map(t => `
             <div class="testimonial-card">
                 <p>"${escapeHtml(t.body)}"</p>
-                <div class="t-author">— ${escapeHtml(t.name)}</div>
+                <div class="t-author">
+                    — ${escapeHtml(t.name)}
+                </div>
             </div>
-        `).join('');
+        `).join("");
     }
 
-    function escapeHtml(str) {
-        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
-
-    // Load all testimonials from the sheet, then show only approved ones.
-    (function() {
-        const s = document.createElement('script');
-        s.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=responseHandler:_loadSheetTestimonials&sheet=Testimonials`;
-        s.onerror = function(){};
-        document.body.appendChild(s);
-    })();
-    window._loadSheetTestimonials = function(data) {
+    // ------------------------------------------------
+    // Load testimonials from SheetDB
+    // ------------------------------------------------
+    async function loadTestimonials() {
         try {
-            const rows = data.table.rows || [];
-            _allTestimonials = rows.map(row => ({
-                id:     row.c[0] ? String(row.c[0].v) : '',
-                name:   row.c[1] ? String(row.c[1].v) : '',
-                body:   row.c[2] ? String(row.c[2].v) : '',
-                status: row.c[3] ? String(row.c[3].v).toLowerCase() : 'pending',
-                date:   row.c[4] ? String(row.c[4].v) : ''
-            })).filter(t => t.body);
-        } catch(e) { _allTestimonials = []; }
-        renderApprovedTestimonials();
-    };
 
+            const response = await fetch(TESTIMONIAL_API);
+
+            if (!response.ok)
+                throw new Error("Failed to fetch testimonials");
+
+            const data = await response.json();
+
+            _allTestimonials = data.map(item => ({
+                id: item.id || "",
+                name: item.name || "",
+                body: item.body || "",
+                status: (item.status || "pending").toLowerCase(),
+                date: item.date || ""
+            }));
+
+        } catch (err) {
+            console.error("Error loading testimonials:", err);
+            _allTestimonials = [];
+        }
+
+        renderApprovedTestimonials();
+    }
+
+    // ------------------------------------------------
+    // Submit testimonial
+    // ------------------------------------------------
     async function submitTestimonial() {
-        const nameEl = document.getElementById('tName');
-        const bodyEl = document.getElementById('tBody');
-        const msgEl  = document.getElementById('tFormMsg');
+
+        const nameEl = document.getElementById("tName");
+        const bodyEl = document.getElementById("tBody");
+        const msgEl = document.getElementById("tFormMsg");
+
         const name = nameEl.value.trim();
         const body = bodyEl.value.trim();
 
-        if (!name) { msgEl.style.color='#ff5d73'; msgEl.textContent='⚠️ Please enter your name.'; return; }
-        if (body.length < 10) { msgEl.style.color='#ff5d73'; msgEl.textContent='⚠️ Please write at least a few words.'; return; }
+        if (!name) {
+            msgEl.style.color = "#ff5d73";
+            msgEl.textContent = "⚠️ Please enter your name.";
+            return;
+        }
 
-        msgEl.style.color = 'var(--muted)';
-        msgEl.textContent = 'Sending...';
+        if (body.length < 10) {
+            msgEl.style.color = "#ff5d73";
+            msgEl.textContent = "⚠️ Please write at least a few words.";
+            return;
+        }
+
+        msgEl.style.color = "var(--muted)";
+        msgEl.textContent = "Sending...";
+
+        const testimonial = {
+            id: Date.now().toString(),
+            name: name,
+            body: body,
+            status: "pending",
+            date: new Date().toLocaleDateString()
+        };
 
         try {
-            const fd = new FormData();
-            fd.append('action', 'submitTestimonial');
-            fd.append('id', String(Date.now()));
-            fd.append('name', name);
-            fd.append('body', body);
-            fd.append('date', new Date().toLocaleDateString());
 
-            const res = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: fd });
-            const json = await res.json();
-            if (json.status !== 'success') throw new Error();
+            const response = await fetch(TESTIMONIAL_API, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    data: [testimonial]
+                })
+            });
 
-            nameEl.value = '';
-            bodyEl.value = '';
-            msgEl.style.color = 'var(--success)';
-            msgEl.textContent = '✅ Thank you! Your testimonial has been submitted for review.';
-        } catch(err) {
-            msgEl.style.color = '#ff5d73';
-            msgEl.textContent = '❌ Could not submit right now. Please try again shortly.';
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || "Submission failed.");
+            }
+
+            nameEl.value = "";
+            bodyEl.value = "";
+
+            msgEl.style.color = "var(--success)";
+            msgEl.textContent =
+                "✅ Thank you! Your testimonial has been submitted for review.";
+
+        } catch (err) {
+
+            console.error(err);
+
+            msgEl.style.color = "#ff5d73";
+            msgEl.textContent =
+                "❌ Could not submit right now. Please try again.";
+
         }
-        setTimeout(() => { msgEl.textContent = ''; }, 6000);
+
+        setTimeout(() => {
+            msgEl.textContent = "";
+        }, 6000);
     }
-    </script>
+
+    // ------------------------------------------------
+    // Reload every minute
+    // ------------------------------------------------
+    loadTestimonials();
+    setInterval(loadTestimonials, 60000);
+
+</script>
 
     <!-- ── HERO TYPING EFFECT (visual enhancement only) ── -->
     <script>
