@@ -567,6 +567,292 @@
         display: block;
     }
 }
+
+
+/* ----- gallery ----- */
+
+/* ==========================================
+   DYNAMIC AUTO-SCROLLING GALLERY & MODAL CSS
+   ========================================== */
+
+/* --- GALLERY SLIDING WRAPPER --- */
+.gallery-container {
+    width: 100%;
+    overflow: hidden;
+    padding: 40px 0;
+    position: relative;
+}
+
+/* Gradients to smoothly fade out edges on the left & right sides */
+.gallery-container::before,
+.gallery-container::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 150px;
+    z-index: 2;
+    pointer-events: none;
+}
+.gallery-container::before {
+    left: 0;
+    background: linear-gradient(to right, var(--bg), transparent);
+}
+.gallery-container::after {
+    right: 0;
+    background: linear-gradient(to left, var(--bg), transparent);
+}
+
+/* The rolling track */
+.gallery-track {
+    display: flex;
+    gap: var(--gap, 24px);
+    width: max-content;
+    animation: galleryScroll var(--scroll-speed, 30s) linear infinite;
+}
+
+/* Pauses auto-scroll on hover so users can easily click a project card */
+.gallery-container:hover .gallery-track {
+    animation-play-state: paused;
+}
+
+/* Seamless translation formula (shifts exactly half-width to loop forever) */
+@keyframes galleryScroll {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(calc(-50% - (var(--gap, 24px) / 2)));
+    }
+}
+
+/* --- STATIC CALL-OUT CARDS (NO ZOOM ON CLICK) --- */
+.gallery-item {
+    width: var(--card-width, 280px);
+    height: var(--card-height, 380px);
+    background-color: var(--panel);
+    border-radius: var(--radius);
+    overflow: hidden;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border);
+    transition: border-color var(--fast), box-shadow var(--fast);
+}
+
+.gallery-item:hover {
+    border-color: var(--amber);
+    box-shadow: var(--shadow);
+}
+
+.gallery-item img {
+    width: 100%;
+    height: 72%;
+    object-fit: cover;
+    display: block;
+}
+
+.gallery-item-info {
+    padding: 1.25rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.gallery-item-info h3 {
+    font-family: var(--font-head);
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: var(--text);
+}
+
+.gallery-item-info p {
+    font-size: 0.85rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: .05em;
+}
+
+/* --- DYNAMIC RIGID MODAL OVERLAY --- */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    background: rgba(4, 6, 9, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--fast);
+}
+
+.modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.modal-content {
+    background-color: var(--panel);
+    width: 90%;
+    max-width: 950px;
+    height: 550px; /* Locked height preserves absolute alignment */
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    display: flex; /* Clean horizontal split */
+    box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.8);
+    border: 1px solid var(--border);
+    transform: translateY(20px) scale(.97);
+    transition: transform .3s var(--ease);
+}
+
+.modal-overlay.open .modal-content {
+    transform: translateY(0) scale(1);
+}
+
+/* Close Button styling */
+.close-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: rgba(15, 23, 42, 0.7);
+    border: none;
+    color: var(--text);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 1.4rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    transition: background var(--fast);
+}
+
+.close-btn:hover {
+    background: var(--danger);
+}
+
+/* LEFT PANEL (58% Static Area for Visuals) */
+.modal-left {
+    width: 58%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: #05070a;
+    border-right: 1px solid var(--border);
+}
+
+.modal-hero-container {
+    width: 100%;
+    height: 70%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.modal-hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Keeps layouts clean. Switch to 'contain' if you prefer border padding */
+    border-radius: 8px;
+}
+
+/* Locked bottom thumbnails tray (up to 3 images) */
+.modal-related-strip {
+    width: 100%;
+    height: 30%;
+    display: flex;
+    gap: 12px;
+    padding: 12px 16px;
+    background-color: rgba(8, 11, 16, 0.5);
+    overflow-x: auto;
+    align-items: center;
+}
+
+.modal-related-strip img {
+    height: 100%;
+    aspect-ratio: 1.3;
+    object-fit: cover;
+    border-radius: 6px;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.2s, border-color 0.2s;
+    border: 2px solid transparent;
+    flex-shrink: 0; /* Prevents visual squeezing */
+}
+
+.modal-related-strip img:hover,
+.modal-related-strip img.active {
+    opacity: 1;
+    border-color: var(--amber);
+}
+
+/* RIGHT PANEL (42% Static Area for Content Details) */
+.modal-right {
+    width: 42%;
+    height: 100%;
+    padding: 2.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow-y: auto; /* Scroll is limited specifically to text block */
+}
+
+.modal-right h2 {
+    font-family: var(--font-head);
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+    line-height: 1.2;
+}
+
+.modal-right .tag {
+    align-self: start;
+    background-color: var(--amber-dim);
+    color: var(--amber);
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-bottom: 1.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.modal-right p {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--muted);
+}
+
+/* RESPONSIVE LAYOUT SWITCH */
+@media (max-width: 768px) {
+    .modal-content {
+        flex-direction: column;
+        height: 90vh;
+    }
+    .modal-left {
+        width: 100%;
+        height: 55%;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+    }
+    .modal-right {
+        width: 100%;
+        height: 45%;
+        padding: 1.5rem;
+    }
+}
     </style>
 </head>
 <body>
@@ -584,6 +870,7 @@
         <ul class="nav-links">
             <li><a href="#hero">Home</a></li>
             <li><a href="#services">Services</a></li>
+            <li><a href="#gallery">Gallery</a></li>
             <li><a href="#about">About</a></li>
             <li><a href="#contact">Contact</a></li>
             <li><a href="#testimonials">Testimonials</a></li>
@@ -614,6 +901,7 @@
     <div class="nav-mobile" id="navMobile">
         <a href="#hero" onclick="closeMenu()">Home</a>
         <a href="#services" onclick="closeMenu()">Services</a>
+        <a href="#gallery" onclick="closeMenu()">Gallery</a>
         <a href="#about" onclick="closeMenu()">About</a>
         <a href="#contact" onclick="closeMenu()">Contact</a>
         <a href="#testimonials" onclick="closeMenu()">Testimonials</a>
@@ -699,6 +987,49 @@
             <div class="no-results" id="noResults">No services match the selected filter.</div>
         </div>
     </section>
+
+    <!-- ---- Gallery ---- -->
+    <!-- ---------- GALLERY SECTION ---------- -->
+    <section id="gallery" class="section">
+        <div class="container">
+            <div class="eyebrow">Featured Projects</div>
+            <!-- Infinite Auto Scroll Track -->
+            <div class="gallery-container">
+                <div class="gallery-track" id="galleryTrack">
+                    <!-- Generated Dynamically from SheetDB API -->
+                </div>
+            </div>
+
+            <!-- fallback message if filter yields no matches -->
+            <div class="no-results" id="noResults" style="display: none; text-align: center; color: var(--muted); padding: 40px 0;">
+                No gallery items match the selected filter.
+            </div>
+        </div>
+
+        <!-- MODAL OVERLAY & RIGID CONTAINER -->
+        <div class="modal-overlay" id="galleryModal">
+            <div class="modal-content">
+                <button class="close-btn" id="closeBtn">&times;</button>
+                
+                <!-- LEFT PANEL: Static Image Viewports -->
+                <div class="modal-left">
+                    <div class="modal-hero-container">
+                        <img id="modalHeroImg" class="modal-hero-img" src="" alt="Active View">
+                    </div>
+                    <div id="modalRelatedStrip" class="modal-related-strip"></div>
+                </div>
+                
+                <!-- RIGHT PANEL: Static Content Description -->
+                <div class="modal-right">
+                    <span id="modalTag" class="tag">Category</span>
+                    <h2 id="modalTitle">Title of the Project</h2>
+                    <p id="modalDescription">Detailed description goes here...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+<!-- ---- Gallery ---- -->
+
 
     <section id="about" class="section">
         <div class="container">
@@ -1520,6 +1851,125 @@ const GOOGLE_SCRIPT_URL =
         }
         tick();
     })();
+
+
+    // ----- Gallery -----
+    const track = document.getElementById('galleryTrack');
+const modal = document.getElementById('galleryModal'); // Updated ID to match HTML
+const closeBtn = document.getElementById('closeBtn');
+
+// --- FETCH DATA FROM SHEETDB ---
+async function loadGallery() {
+  try {
+    const response = await fetch('https://sheetdb.io/api/v1/brlb1fmx0y8h4');
+    const data = await response.json();
+    
+    if (!data || data.length === 0) {
+      track.innerHTML = '<p style="color: var(--muted)">No gallery data found in your Google Sheet.</p>';
+      return;
+    }
+
+    // Map SheetDB API properties to match our internal template structure
+    const formattedData = data.map(row => {
+      // Gather up to 3 related images, filtering out any empty cells
+      const related = [];
+      if (row.relatedImg1) related.push(row.relatedImg1);
+      if (row.relatedImg2) related.push(row.relatedImg2);
+      if (row.relatedImg3) related.push(row.relatedImg3);
+      
+      // Fallback if no related images are specified in Google Sheets
+      if (related.length === 0 && row.thumbImg) {
+        related.push(row.thumbImg);
+      }
+
+      return {
+        id: row.id || Math.random(),
+        title: row.title || 'Untitled Project',
+        tag: row.tag || 'General',
+        thumbImg: row.thumbImg || 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=600&q=80',
+        description: row.description || 'No description provided.',
+        relatedImages: related
+      };
+    });
+
+    // Duplicate dataset to ensure seamless continuous scrolling
+    renderGallery([...formattedData, ...formattedData]);
+
+  } catch (error) {
+    console.error("Error loading SheetDB data: ", error);
+    track.innerHTML = '<p style="color: var(--danger); text-align: center; width: 100%;">Error connecting to Google Sheet API.</p>';
+  }
+}
+
+// --- RENDER CAROUSEL ---
+function renderGallery(items) {
+  track.innerHTML = ''; // Clear fallback loading state
+  
+  items.forEach((item) => {
+    const card = document.createElement('div');
+    card.classList.add('gallery-item');
+    card.innerHTML = `
+      <img src="${item.thumbImg}" alt="${item.title}">
+      <div class="gallery-item-info">
+        <h3>${item.title}</h3>
+        <p>${item.tag}</p>
+      </div>
+    `;
+    
+    card.addEventListener('click', () => openModal(item));
+    track.appendChild(card);
+  });
+}
+
+// --- MODAL CONTROLLER ---
+function openModal(item) {
+  document.getElementById('modalTitle').textContent = item.title;
+  document.getElementById('modalTag').textContent = item.tag;
+  document.getElementById('modalDescription').textContent = item.description;
+  
+  const heroImg = document.getElementById('modalHeroImg');
+  heroImg.src = item.relatedImages[0];
+  
+  const strip = document.getElementById('modalRelatedStrip');
+  strip.innerHTML = ''; // Reset strip
+  
+  // Inject up to 3 related sub-images on the left bottom strip
+  item.relatedImages.forEach((imgUrl, idx) => {
+    const img = document.createElement('img');
+    img.src = imgUrl;
+    img.alt = `${item.title} variant ${idx + 1}`;
+    if (idx === 0) img.classList.add('active');
+    
+    img.addEventListener('click', () => {
+      document.querySelectorAll('.modal-related-strip img').forEach(el => el.classList.remove('active'));
+      img.classList.add('active');
+      heroImg.src = imgUrl; 
+    });
+    
+    strip.appendChild(img);
+  });
+
+  modal.classList.add('open'); // Updated class toggling to match stylesheet
+}
+
+function closeModal() {
+  modal.classList.remove('open'); // Updated class toggling to match stylesheet
+}
+
+closeBtn.addEventListener('click', closeModal);
+
+modal.addEventListener('click', (e) => {
+  if (e.target === modal) closeModal();
+});
+
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && modal.classList.contains('open')) {
+    closeModal();
+  }
+});
+
+// Start App
+loadGallery();
     </script>
 </body>
 </html>
