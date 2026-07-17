@@ -224,7 +224,7 @@ const API = {
     services: "https://sheetdb.io/api/v1/jck3mslfaposo",
     contacts: "https://sheetdb.io/api/v1/CONTACT_API_ID",
     bookings: "https://sheetdb.io/api/v1/adb6hsa4zfali",
-    testimonials: "https://sheetdb.io/api/v1/wnkdaua170ntr"
+    testimonials: "https://sheetdb.io/api/v1/ock3853wuff2j"
 };
 
 async function sheetdbGet(apiUrl, searchParams = {}) {
@@ -467,79 +467,209 @@ async function deleteService(id){
 }
 
 // ================================================================
-// TESTIMONIALS
+// TESTIMONIALS (SheetDB)
 // ================================================================
-let currentTestimonials = [];
-let activeStatus = 'pending';
 
-async function loadTestimonials(){
-  document.getElementById('testimonialsTableWrap').innerHTML = '<div class="loading-state">Loading testimonials…</div>';
-  try {
-    const rows = await sheetdbGet(API.testimonials);
-    currentTestimonials = (Array.isArray(rows) ? rows : []).map(row => ({
-      id:     row.id || '',
-      name:   row.name || '',
-      body:   row.body || '',
-      status: (row.status || 'pending').toLowerCase(),
-      date:   row.date || ''
-    })).filter(t => t.body);
-  } catch(e) {
-    currentTestimonials = [];
-    document.getElementById('testimonialsTableWrap').innerHTML = '<div class="empty-state">Could not load testimonials from the sheet.</div>';
-    return;
-  }
-  renderTestimonialsTable();
+let currentTestimonials = [];
+let activeStatus = "pending";
+
+async function loadTestimonials() {
+
+    const wrap = document.getElementById("testimonialsTableWrap");
+    wrap.innerHTML = '<div class="loading-state">Loading testimonials…</div>';
+
+    try {
+
+        const response = await fetch(API.testimonials);
+
+        if (!response.ok)
+            throw new Error("Failed to load");
+
+        const rows = await response.json();
+
+        currentTestimonials = (Array.isArray(rows) ? rows : []).map(row => ({
+            id: row.id || "",
+            name: row.name || "",
+            body: row.body || "",
+            status: (row.status || "pending").toLowerCase(),
+            date: row.date || ""
+        })).filter(t => t.body);
+
+    } catch (e) {
+
+        console.error(e);
+
+        currentTestimonials = [];
+        wrap.innerHTML =
+            '<div class="empty-state">Could not load testimonials.</div>';
+        return;
+    }
+
+    renderTestimonialsTable();
 }
 
-document.querySelectorAll('.subtab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.subtab-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    activeStatus = btn.dataset.status;
-    renderTestimonialsTable();
-  });
+// ------------------------------------------------
+
+document.querySelectorAll(".subtab-btn").forEach(btn => {
+
+    btn.addEventListener("click", () => {
+
+        document.querySelectorAll(".subtab-btn")
+            .forEach(b => b.classList.remove("active"));
+
+        btn.classList.add("active");
+
+        activeStatus = btn.dataset.status;
+
+        renderTestimonialsTable();
+
+    });
+
 });
 
-const statusTagMap = { pending:'tag-pending', approved:'tag-approved', declined:'tag-declined' };
+// ------------------------------------------------
 
-function renderTestimonialsTable(){
-  const wrap = document.getElementById('testimonialsTableWrap');
-  const list = currentTestimonials.filter(t => t.status === activeStatus);
-  if (!list.length){
-    wrap.innerHTML = `<div class="empty-state">No ${activeStatus} testimonials.</div>`;
-    return;
-  }
-  wrap.innerHTML = `<table>
-    <thead><tr><th>Name</th><th>Testimonial</th><th>Date</th><th>Status</th><th></th></tr></thead>
-    <tbody>${list.map(t => `
-      <tr>
-        <td><strong>${escapeHtml(t.name)}</strong></td>
-        <td class="cell-desc">${escapeHtml(t.body)}</td>
-        <td>${escapeHtml(t.date)}</td>
-        <td><span class="tag ${statusTagMap[t.status]||''}">${t.status}</span></td>
-        <td>
-          ${t.status !== 'approved' ? `<button class="icon-btn success" onclick="setTestimonialStatus('${t.id}','approved')">Approve</button>` : ''}
-          ${t.status !== 'declined' ? `<button class="icon-btn danger" onclick="setTestimonialStatus('${t.id}','declined')">Decline</button>` : ''}
-        </td>
-      </tr>`).join('')}
-    </tbody>
-  </table>`;
+const statusTagMap = {
+    pending: "tag-pending",
+    approved: "tag-approved",
+    declined: "tag-declined"
+};
+
+// ------------------------------------------------
+
+function renderTestimonialsTable() {
+
+    const wrap = document.getElementById("testimonialsTableWrap");
+
+    const list = currentTestimonials.filter(
+        t => t.status === activeStatus
+    );
+
+    if (!list.length) {
+        wrap.innerHTML = `
+            <div class="empty-state">
+                No ${activeStatus} testimonials.
+            </div>`;
+        return;
+    }
+
+    wrap.innerHTML = `
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Testimonial</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th width="180"></th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+        ${list.map(t => `
+            <tr>
+
+                <td><strong>${escapeHtml(t.name)}</strong></td>
+
+                <td class="cell-desc">
+                    ${escapeHtml(t.body)}
+                </td>
+
+                <td>${escapeHtml(t.date)}</td>
+
+                <td>
+                    <span class="tag ${statusTagMap[t.status]}">
+                        ${t.status}
+                    </span>
+                </td>
+
+                <td>
+
+                    ${t.status !== "approved"
+                        ? `<button class="icon-btn success"
+                            onclick="setTestimonialStatus('${t.id}','approved')">
+                            Approve
+                           </button>`
+                        : ""}
+
+                    ${t.status !== "declined"
+                        ? `<button class="icon-btn danger"
+                            onclick="setTestimonialStatus('${t.id}','declined')">
+                            Decline
+                           </button>`
+                        : ""}
+
+                </td>
+
+            </tr>
+
+        `).join("")}
+
+        </tbody>
+
+    </table>
+    `;
 }
 
-document.getElementById('refreshTestimonials').addEventListener('click', loadTestimonials);
+// ------------------------------------------------
+// Approve / Decline
+// ------------------------------------------------
 
-async function setTestimonialStatus(id, status){
-  if (!id) return;
-  try {
-    await sheetdbUpdateById('Testimonials', id, { status: status });
-    const t = currentTestimonials.find(x => x.id === id);
-    if (t) t.status = status;
-    renderTestimonialsTable();
-    setTimeout(loadTestimonials, 1200);
-  } catch(err){
-    alert('Could not update this testimonial. Please try again.');
-  }
+async function setTestimonialStatus(id, status) {
+
+    if (!id) return;
+
+    try {
+
+        const response = await fetch(
+            `${API.testimonials}/id/${encodeURIComponent(id)}`,
+            {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    data: {
+                        status: status
+                    }
+                })
+            }
+        );
+
+        if (!response.ok)
+            throw new Error("Update failed");
+
+        // Update locally
+        const testimonial = currentTestimonials.find(t => t.id === id);
+
+        if (testimonial)
+            testimonial.status = status;
+
+        renderTestimonialsTable();
+
+        // Refresh from SheetDB after a short delay
+        setTimeout(loadTestimonials, 500);
+
+    }
+    catch (err) {
+
+        console.error(err);
+
+        alert("Could not update this testimonial.");
+
+    }
+
 }
+
+// ------------------------------------------------
+
+document
+    .getElementById("refreshTestimonials")
+    .addEventListener("click", loadTestimonials);
+
+// Initial load
+loadTestimonials();
 // ================================================================
 // CONTACTS
 // ================================================================
